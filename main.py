@@ -59,10 +59,24 @@ class App:
         ##conversation Frame
         coversationTopSpacer = ctk.CTkLabel(master=self.root, height=15, text="")
         coversationTopSpacer.pack()
-        conversationFrame = ctk.CTkFrame(master=self.root, width=420, height=650)
-        conversationFrame.pack(fill="both", expand=True, padx=10, pady=10)  ############
+        conversationFrame = ctk.CTkScrollableFrame(
+            master=self.root, width=420, height=650
+        )
+        conversationFrame.pack(
+            fill="both", expand=False, padx=10, pady=10
+        )  ############
         coversationBottomSpacer = ctk.CTkLabel(master=self.root, height=15, text="")
         coversationBottomSpacer.pack()
+        innerConversationFrame = ctk.CTkFrame(
+            master=conversationFrame,
+            ##border_width=2,
+            ##border_color="white",
+            width=450,
+            height=650,
+            fg_color="transparent",
+            bg_color="transparent",
+        )
+        innerConversationFrame.pack(anchor="se", expand=True, fill="x")
 
         ##User Input Section##
         UISectionFrame = ctk.CTkFrame(
@@ -93,11 +107,11 @@ class App:
             height=35,
             command=(
                 lambda: self.spawnNewChatBubble(
-                    tkMaster=conversationFrame,
+                    tkMaster=innerConversationFrame,
                     color="white",
-                    text="test message",
-                    sender="Joe Mama",
-                    anchorDir="e"
+                    text=userTextInput.get("1.0", ctk.END),
+                    sender="user",
+                    anchorDir="e",
                 )
             ),
         )
@@ -138,6 +152,11 @@ class App:
     def startMainLoop(self):
         self.root.mainloop()
 
+    def localAskOllama():
+        print("Asking ollama About")
+        ##fetch here
+        ##test with dummy res/ no fetching
+        ##repond by spawnNewChatBubble(tkMaster, color="pink", text=res.message.content, sended=res.user, anchorDir="w")
 
 if __name__ == "__main__":
 

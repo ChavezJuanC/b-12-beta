@@ -14,10 +14,12 @@ class ChatBubble:
     def createChatBubble(self):
         newChatBubble = ctk.CTkLabel(
             master=self.tkMaster,
-            text=self.text + str(self.createTimeStamp()),
+            text=self.text,
             fg_color=self.color,
+            text_color="black",
+            wraplength=400,
         )
-        newChatBubble.pack(side="bottom", anchor=self.anchorDir)
+        newChatBubble.pack(side="top", anchor=self.anchorDir, padx=10, pady=5)
 
     def createTimeStamp(self):
         date = self.timeStamp.strftime("%Y-%m-%d")
