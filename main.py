@@ -1,4 +1,6 @@
 import customtkinter as ctk
+from ChatBubbleModule import ChatBubble
+
 
 class App:
     def __init__(
@@ -58,7 +60,7 @@ class App:
         coversationTopSpacer = ctk.CTkLabel(master=self.root, height=15, text="")
         coversationTopSpacer.pack()
         conversationFrame = ctk.CTkFrame(master=self.root, width=420, height=650)
-        conversationFrame.pack()
+        conversationFrame.pack(fill="both", expand=True, padx=10, pady=10)  ############
         coversationBottomSpacer = ctk.CTkLabel(master=self.root, height=15, text="")
         coversationBottomSpacer.pack()
 
@@ -85,7 +87,19 @@ class App:
         )
         userTextInput.place(x=0, y=5)
         userSendButtom = ctk.CTkButton(
-            master=UserInputSectionFrame, text="Send Promt", width=100, height=35
+            master=UserInputSectionFrame,
+            text="Send Promt",
+            width=100,
+            height=35,
+            command=(
+                lambda: self.spawnNewChatBubble(
+                    tkMaster=conversationFrame,
+                    color="white",
+                    text="test message",
+                    sender="Joe Mama",
+                    anchorDir="e"
+                )
+            ),
         )
         userSendButtom.place(x=255, y=140)
 
@@ -110,6 +124,16 @@ class App:
             master=userAttachmentButtonsFrame, text="AT", width=40, height=40
         )
         clearContextButton.place(x=0, y=135)
+
+    def spawnNewChatBubble(self, tkMaster, color, text, sender, anchorDir):
+        newChatBubble = ChatBubble(
+            tkMaster=tkMaster,
+            color=color,
+            text=text,
+            sender=sender,
+            anchorDir=anchorDir,
+        )
+        newChatBubble.createChatBubble()
 
     def startMainLoop(self):
         self.root.mainloop()
