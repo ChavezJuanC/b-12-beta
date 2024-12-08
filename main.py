@@ -1,5 +1,7 @@
 import customtkinter as ctk
 from ChatBubbleModule import ChatBubble
+from OllamaChat import ChatService
+import threading
 
 
 class App:
@@ -11,6 +13,7 @@ class App:
         self.screen_width = screen_width
         self.right_side_adjuster = right_side_adjuster
         self.models_list = models_list
+        self.OllamaChatLocal = ChatService("llama3.1")
         self.root = ctk.CTk()
         self.root.geometry("{}x{}".format(str(self.app_width), str(self.app_height)))
         self.root.minsize(self.app_width, self.app_height)
@@ -57,22 +60,16 @@ class App:
         modelDropdown.grid(row=0, column=1)
 
         ##conversation Frame
-        coversationTopSpacer = ctk.CTkLabel(master=self.root, height=15, text="")
-        coversationTopSpacer.pack()
+
         conversationFrame = ctk.CTkScrollableFrame(
-            master=self.root, width=420, height=650
+            master=self.root, width=420, height=645
         )
-        conversationFrame.pack(
-            fill="both", expand=False, padx=10, pady=10
-        )  ############
-        coversationBottomSpacer = ctk.CTkLabel(master=self.root, height=15, text="")
-        coversationBottomSpacer.pack()
+        conversationFrame.pack(fill="both", expand=False, padx=10, pady=10)
+
         innerConversationFrame = ctk.CTkFrame(
             master=conversationFrame,
-            ##border_width=2,
-            ##border_color="white",
             width=450,
-            height=650,
+            height=645,
             fg_color="transparent",
             bg_color="transparent",
         )
@@ -106,16 +103,22 @@ class App:
             width=100,
             height=35,
             command=(
-                lambda: self.spawnNewChatBubble(
+                lambda: self.handleUserSend(
                     tkMaster=innerConversationFrame,
-                    color="white",
-                    text=userTextInput.get("1.0", ctk.END),
-                    sender="user",
-                    anchorDir="e",
+                    textProvider=userTextInput,
+                    conversationFrame=conversationFrame,
                 )
             ),
         )
         userSendButtom.place(x=255, y=140)
+        userTextInput.bind(
+            "<Return>",
+            lambda event: self.handleUserSend(
+                tkMaster=innerConversationFrame,
+                textProvider=userTextInput,
+                conversationFrame=conversationFrame,
+            ),
+        )
 
         ##User Attachment Section
         userAttachmentButtonsFrame = ctk.CTkFrame(
@@ -139,24 +142,59 @@ class App:
         )
         clearContextButton.place(x=0, y=135)
 
-    def spawnNewChatBubble(self, tkMaster, color, text, sender, anchorDir):
+    def spawnNewChatBubble(self, tkMaster, color, text, conversationFrame):
         newChatBubble = ChatBubble(
             tkMaster=tkMaster,
             color=color,
             text=text,
-            sender=sender,
-            anchorDir=anchorDir,
+            sender="User",
+            anchorDir="e",
+            sidePadding=5,
         )
         newChatBubble.createChatBubble()
+        self.scrollToRecentMessages(conversationFrame)
+
+    def localAskOllama(self, tkMaster, prompt, conversationFrame):
+        ##fetch here
+        ChatRes = self.OllamaChatLocal.askOllama(promptMessage=prompt)
+        newChatBubble = ChatBubble(
+            tkMaster=tkMaster,
+            color="transparent",
+            text=ChatRes,
+            sender="AI",
+            anchorDir="w",
+            sidePadding=0,
+        )
+        newChatBubble.createChatBubble()
+        self.scrollToRecentMessages(messageFrame=conversationFrame)
+
+    def scrollToRecentMessages(self, messageFrame):
+        messageFrame.update_idletasks()
+        messageFrame._parent_canvas.yview_moveto(1.0)
+
+    def handleUserSend(self, tkMaster, textProvider, conversationFrame):
+        self.spawnNewChatBubble(
+            tkMaster=tkMaster,
+            color="gray25",
+            text=textProvider.get("1.0", "end-1c"),
+            conversationFrame=conversationFrame,
+        )
+        # Independent Thread to avoid main thread interuption
+        threading.Thread(
+            target=self.localAskOllama,
+            kwargs={
+                "tkMaster": tkMaster,
+                "prompt": textProvider.get("1.0", ctk.END),
+                "conversationFrame": conversationFrame,
+            },
+            daemon=True,
+        ).start()
+        # reset textbox
+        textProvider.delete("1.0", "end")
 
     def startMainLoop(self):
         self.root.mainloop()
 
-    def localAskOllama():
-        print("Asking ollama About")
-        ##fetch here
-        ##test with dummy res/ no fetching
-        ##repond by spawnNewChatBubble(tkMaster, color="pink", text=res.message.content, sended=res.user, anchorDir="w")
 
 if __name__ == "__main__":
 
@@ -164,7 +202,7 @@ if __name__ == "__main__":
 
     appInstance = App(
         app_width=450,
-        app_height=1005,
+        app_height=1000,
         screen_width=1920,
         right_side_adjuster=8,
         models_list=models,
