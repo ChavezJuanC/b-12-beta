@@ -1,4 +1,12 @@
 
+
+In Progress
+
+Please note that this project is still under development. Some features may not be fully implemented, and certain functionalities may change as the project evolves. We appreciate your patience and feedback as we continue to improve the application.
+
+
+
+
 # Pre-Boot Script for B-12 Application
 
 This repository contains a script that prepares the environment and automatically runs the main application. The pre-boot script will ensure that all necessary components are in place before launching the main application.
