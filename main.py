@@ -2,18 +2,26 @@ import customtkinter as ctk
 from ChatBubbleModule import ChatBubble
 from OllamaChat import ChatService
 import threading
+import requests
 
 
 class App:
     def __init__(
-        self, app_width, app_height, screen_width, right_side_adjuster, models_list
+        self,
+        app_width,
+        app_height,
+        screen_width,
+        right_side_adjuster,
+        models_list,
+        current_model,
     ):
+        self.current_model = current_model
         self.app_width = app_width
         self.app_height = app_height
         self.screen_width = screen_width
         self.right_side_adjuster = right_side_adjuster
         self.models_list = models_list
-        self.OllamaChatLocal = ChatService("llama3.1")
+        self.OllamaChatLocal = ChatService(self.current_model)
         self.root = ctk.CTk()
         self.root.geometry("{}x{}".format(str(self.app_width), str(self.app_height)))
         self.root.minsize(self.app_width, self.app_height)
@@ -25,6 +33,10 @@ class App:
         )  # Move it to the right side and top
         self.root.title("B-12 Beta")
         self.buildGUI()
+
+    def update_current_model(self, value):
+        self.current_model = value
+        print(f"Current model selected: {self.current_model}")
 
     def buildGUI(self):
 
@@ -56,6 +68,7 @@ class App:
             dropdown_fg_color="white",
             dropdown_text_color="black",
             dropdown_hover_color="powderblue",
+            command=lambda value: self.update_current_model(value),
         )
         modelDropdown.grid(row=0, column=1)
 
@@ -191,6 +204,7 @@ class App:
         ).start()
         # reset textbox
         textProvider.delete("1.0", "end")
+        return "break"  # Prevent the default action (moving to the next line)
 
     def startMainLoop(self):
         self.root.mainloop()
@@ -198,13 +212,24 @@ class App:
 
 if __name__ == "__main__":
 
-    models = ["Ollama 3.1", "Ollama 3.2", "Ollama 3.1b"]
+    try:
+        models = requests.get("http://localhost:11434/api/tags")
+        models.raise_for_status()
+        models_list = models.json()
 
-    appInstance = App(
-        app_width=450,
-        app_height=1000,
-        screen_width=1920,
-        right_side_adjuster=8,
-        models_list=models,
-    )
-    appInstance.startMainLoop()
+        model_names = [model["name"] for model in models_list["models"]]
+
+        appInstance = App(
+            app_width=450,
+            app_height=1000,
+            screen_width=1920,
+            right_side_adjuster=8,
+            models_list=model_names,
+            current_model="llama3.1",
+        )
+        appInstance.startMainLoop()
+
+    except Exception as e:
+        print(
+            f"Error Initializing App, Please try again and make sure to run pre-boot-script.py to launch\nError:{e}"
+        )

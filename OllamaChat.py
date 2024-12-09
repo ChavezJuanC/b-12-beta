@@ -1,6 +1,5 @@
 import requests
 
-
 class ChatService:
 
     def __init__(self, model):
