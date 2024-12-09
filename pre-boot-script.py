@@ -9,18 +9,31 @@ class PreBoot:
         pass
 
     def run_pre_boot(self):
-        input("Please make sure ollama is running and press any key to continue.")
-        print("Starting...")
+        print("-----------------------------------------------------------------------")
+        input(
+            "Please make sure ollama is running and press any key to continue.\n"
+            + "-----------------------------------------------------------------------"
+        )
+        print("Starting B-12...")
 
         self.verify_ollama()
         self.list_avail_models()
-        ##ping ollama here!!
-        print("Starting B-12...")
 
-        userInput = input("Enter to continue")
+        print("-----------------------------------------------------------------------")
+        userInput = input(
+            "Pre-boot successful\n\n"
+            + "Press any key to Launch B-12\n"
+            + "-----------------------------------------------------------------------"
+        )
 
         while userInput != "":
-            userInput = input("Enter to continue")
+            print(
+                "-----------------------------------------------------------------------"
+            )
+            userInput = input(
+                "Enter to continue\n"
+                + "-----------------------------------------------------------------------"
+            )
 
         ##start GUI
         self.boot_gui()
@@ -62,8 +75,15 @@ class PreBoot:
             return model_names
 
         except Exception as e:
+            print(
+                "-----------------------------------------------------------------------"
+            )
             print(f"Error Initializing App, make sure Ollama is running and try again.")
-            userInput = input("press E to exit or any other key to try again")
+            userInput = input(
+                "press E to exit or any other key to try again\n"
+                + "-----------------------------------------------------------------------"
+            )
+
             if userInput.upper() == "E":
                 sys.exit()
             else:
@@ -90,8 +110,15 @@ class PreBoot:
                 pinging = False
 
             except requests.exceptions.RequestException as e:
+
+                print(
+                    "-----------------------------------------------------------------------"
+                )
                 print("Error connecting to Ollama. Please make sure it is running.")
                 print(f"Details: {e}")
+                print(
+                    "-----------------------------------------------------------------------"
+                )
                 choice = input("Press 'r' to retry or any other key to exit: ").lower()
                 if choice != "r":
                     pinging = False
