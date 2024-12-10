@@ -1,7 +1,6 @@
 import ollama
 import os
 
-
 class VisionChatService:
 
     visionModels = ["llama3.2-vision:11b", "llama3.2-vision:latest"]

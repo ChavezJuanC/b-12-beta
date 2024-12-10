@@ -93,7 +93,7 @@ class PreBoot:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         gui_file = os.path.join(current_dir, "main.py")
         # Run the GUI file in the background using subprocess.Popen
-        subprocess.Popen(["pythonw", gui_file])
+        subprocess.Popen(["python", gui_file])
 
     def ping_ollama(self, defaultModel):
         print(f"Pinging Ollama with model: {defaultModel}")

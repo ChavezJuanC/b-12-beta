@@ -5,6 +5,7 @@ from VisionOllamaChat import VisionChatService
 import threading
 import requests
 
+
 class App:
     def __init__(
         self,
@@ -35,13 +36,22 @@ class App:
         self.root.title("B-12 Beta")
         self.buildGUI()
 
-    def update_current_model(self, value, messageFrame):
-        self.clear_conv_context(frame=messageFrame)
+    def update_current_model(self, value, messageFrame, buttonList):
         self.current_model = value
+
+        if self.current_model in VisionChatService.visionModels:
+            print("Buttons Enabled")
+            for button in buttonList:
+                button.configure(state="normal")
+        else:
+            print("Buttons Disabled")
+            for button in buttonList:
+                button.configure(state="disabled")
+
+        self.clear_conv_context(frame=messageFrame)
         print(f"Current model selected: {self.current_model}")
 
     def buildGUI(self):
-
         ##App Name
         topSpacer = ctk.CTkLabel(master=self.root, height=15, text="")
         topSpacer.pack()
@@ -71,13 +81,18 @@ class App:
             dropdown_text_color="black",
             dropdown_hover_color="powderblue",
             command=lambda value: self.update_current_model(
-                value, messageFrame=innerConversationFrame
+                value,
+                messageFrame=innerConversationFrame,
+                buttonList=[
+                    screenContextButton,
+                    ImgContextButton,
+                    attachmentContextButton,
+                ],
             ),
         )
         modelDropdown.grid(row=0, column=1)
 
         ##conversation Frame
-
         conversationFrame = ctk.CTkScrollableFrame(
             master=self.root, width=420, height=645
         )
@@ -163,6 +178,16 @@ class App:
         )
         clearContextButton.place(x=0, y=135)
 
+        self.update_current_model(
+            self.current_model,
+            messageFrame=innerConversationFrame,
+            buttonList=[
+                screenContextButton,
+                ImgContextButton,
+                attachmentContextButton,
+            ],
+        )
+
     def spawnNewChatBubble(self, tkMaster, color, text, conversationFrame):
         newChatBubble = ChatBubble(
             tkMaster=tkMaster,
@@ -179,7 +204,10 @@ class App:
         ##fetch here
         if self.current_model in VisionChatService.visionModels:
             ChatRes = self.OllamaVisionLocal.askOllamaVision(
-                promptMessage=prompt, imageContext=["C:\\Users\\dosom\\Downloads\\IMG_8997.jpg"]  ##insert img here
+                promptMessage=prompt,
+                imageContext=[
+                    "C:\\Users\\dosom\\Downloads\\IMG_8997.jpg"
+                ],  ##insert img here
             )
         else:
             ChatRes = self.OllamaChatLocal.askOllama(promptMessage=prompt)
