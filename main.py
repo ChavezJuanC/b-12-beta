@@ -1,9 +1,9 @@
 import customtkinter as ctk
 from ChatBubbleModule import ChatBubble
 from OllamaChat import ChatService
+from VisionOllamaChat import VisionChatService
 import threading
 import requests
-
 
 class App:
     def __init__(
@@ -22,6 +22,7 @@ class App:
         self.right_side_adjuster = right_side_adjuster
         self.models_list = models_list
         self.OllamaChatLocal = ChatService(self.current_model)
+        self.OllamaVisionLocal = VisionChatService(self.current_model)
         self.root = ctk.CTk()
         self.root.geometry("{}x{}".format(str(self.app_width), str(self.app_height)))
         self.root.minsize(self.app_width, self.app_height)
@@ -34,7 +35,8 @@ class App:
         self.root.title("B-12 Beta")
         self.buildGUI()
 
-    def update_current_model(self, value):
+    def update_current_model(self, value, messageFrame):
+        self.clear_conv_context(frame=messageFrame)
         self.current_model = value
         print(f"Current model selected: {self.current_model}")
 
@@ -68,7 +70,9 @@ class App:
             dropdown_fg_color="white",
             dropdown_text_color="black",
             dropdown_hover_color="powderblue",
-            command=lambda value: self.update_current_model(value),
+            command=lambda value: self.update_current_model(
+                value, messageFrame=innerConversationFrame
+            ),
         )
         modelDropdown.grid(row=0, column=1)
 
@@ -173,7 +177,13 @@ class App:
 
     def localAskOllama(self, tkMaster, prompt, conversationFrame):
         ##fetch here
-        ChatRes = self.OllamaChatLocal.askOllama(promptMessage=prompt)
+        if self.current_model in VisionChatService.visionModels:
+            ChatRes = self.OllamaVisionLocal.askOllamaVision(
+                promptMessage=prompt, imageContext=["C:\\Users\\dosom\\Downloads\\IMG_8997.jpg"]  ##insert img here
+            )
+        else:
+            ChatRes = self.OllamaChatLocal.askOllama(promptMessage=prompt)
+
         newChatBubble = ChatBubble(
             tkMaster=tkMaster,
             color="transparent",
@@ -212,6 +222,7 @@ class App:
 
     def clear_conv_context(self, frame):
         self.OllamaChatLocal.clear_chat_context()
+        self.OllamaVisionLocal.clear_chat_context()
         for widget in frame.winfo_children():
             widget.destroy()
 
@@ -234,7 +245,7 @@ if __name__ == "__main__":
             screen_width=1920,
             right_side_adjuster=8,
             models_list=model_names,
-            current_model="llama3.1",
+            current_model=model_names[0],
         )
         appInstance.startMainLoop()
 

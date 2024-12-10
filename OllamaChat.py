@@ -39,6 +39,7 @@ class ChatService:
 
     def add_history_log(self, res, promptMessage):
         self.chatHistory.append({"role": "user", "content": promptMessage})
+        ##adding the AI reponse as context
         self.chatHistory.append(res["message"])
 
     def clear_chat_context(self):
