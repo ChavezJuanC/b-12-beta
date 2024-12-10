@@ -151,7 +151,11 @@ class App:
         )
         attachmentContextButton.place(x=0, y=90)
         clearContextButton = ctk.CTkButton(
-            master=userAttachmentButtonsFrame, text="AT", width=40, height=40
+            master=userAttachmentButtonsFrame,
+            text="CC",
+            width=40,
+            height=40,
+            command=lambda : self.clear_conv_context(frame=innerConversationFrame),
         )
         clearContextButton.place(x=0, y=135)
 
@@ -205,6 +209,11 @@ class App:
         # reset textbox
         textProvider.delete("1.0", "end")
         return "break"  # Prevent the default action (moving to the next line)
+
+    def clear_conv_context(self, frame):
+        self.OllamaChatLocal.clear_chat_context()
+        for widget in frame.winfo_children():
+            widget.destroy()
 
     def startMainLoop(self):
         self.root.mainloop()

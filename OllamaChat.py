@@ -1,5 +1,6 @@
 import requests
 
+
 class ChatService:
 
     def __init__(self, model):
@@ -39,6 +40,9 @@ class ChatService:
     def add_history_log(self, res, promptMessage):
         self.chatHistory.append({"role": "user", "content": promptMessage})
         self.chatHistory.append(res["message"])
+
+    def clear_chat_context(self):
+        self.chatHistory = []
 
     ##Chat Interaction Via Terminal
     def chatInteraction(self):
