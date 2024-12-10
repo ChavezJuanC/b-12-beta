@@ -155,7 +155,7 @@ class App:
             text="CC",
             width=40,
             height=40,
-            command=lambda : self.clear_conv_context(frame=innerConversationFrame),
+            command=lambda: self.clear_conv_context(frame=innerConversationFrame),
         )
         clearContextButton.place(x=0, y=135)
 
