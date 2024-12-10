@@ -40,16 +40,13 @@ class App:
         self.current_model = value
 
         if self.current_model in VisionChatService.visionModels:
-            print("Buttons Enabled")
             for button in buttonList:
                 button.configure(state="normal")
         else:
-            print("Buttons Disabled")
             for button in buttonList:
                 button.configure(state="disabled")
 
         self.clear_conv_context(frame=messageFrame)
-        print(f"Current model selected: {self.current_model}")
 
     def buildGUI(self):
         ##App Name
