@@ -4,7 +4,7 @@ from OllamaChat import ChatService
 from VisionOllamaChat import VisionChatService
 import threading
 import requests
-
+from tkinter import filedialog
 
 class App:
     def __init__(
@@ -24,6 +24,7 @@ class App:
         self.models_list = models_list
         self.OllamaChatLocal = ChatService(self.current_model)
         self.OllamaVisionLocal = VisionChatService(self.current_model)
+        self.contextImg = ""
         self.root = ctk.CTk()
         self.root.geometry("{}x{}".format(str(self.app_width), str(self.app_height)))
         self.root.minsize(self.app_width, self.app_height)
@@ -42,6 +43,7 @@ class App:
         if self.current_model in VisionChatService.visionModels:
             for button in buttonList:
                 button.configure(state="normal")
+                self.contextImg = ""
         else:
             for button in buttonList:
                 button.configure(state="disabled")
@@ -159,11 +161,19 @@ class App:
         )
         screenContextButton.place(x=0, y=0)
         ImgContextButton = ctk.CTkButton(
-            master=userAttachmentButtonsFrame, text="IM", width=40, height=40
+            master=userAttachmentButtonsFrame,
+            text="IM",
+            width=40,
+            height=40,
+            command=self.selectImageFile,
         )
+
         ImgContextButton.place(x=0, y=45)
         attachmentContextButton = ctk.CTkButton(
-            master=userAttachmentButtonsFrame, text="AT", width=40, height=40
+            master=userAttachmentButtonsFrame,
+            text="AT",
+            width=40,
+            height=40,
         )
         attachmentContextButton.place(x=0, y=90)
         clearContextButton = ctk.CTkButton(
@@ -202,12 +212,12 @@ class App:
         if self.current_model in VisionChatService.visionModels:
             ChatRes = self.OllamaVisionLocal.askOllamaVision(
                 promptMessage=prompt,
-                imageContext=[
-                    "C:\\Users\\dosom\\Downloads\\IMG_8997.jpg"
-                ],  ##insert img here
+                imageContext=[self.contextImg],  ##insert img here
             )
         else:
             ChatRes = self.OllamaChatLocal.askOllama(promptMessage=prompt)
+
+        self.contextImg = ""
 
         newChatBubble = ChatBubble(
             tkMaster=tkMaster,
@@ -246,10 +256,24 @@ class App:
         return "break"  # Prevent the default action (moving to the next line)
 
     def clear_conv_context(self, frame):
+        self.contextImg = ""
         self.OllamaChatLocal.clear_chat_context()
         self.OllamaVisionLocal.clear_chat_context()
         for widget in frame.winfo_children():
             widget.destroy()
+
+    def selectImageFile(self):
+        filepath = filedialog.askopenfilename(
+            title="Select an image for context",
+            filetypes=[
+                ("Image Files", "*.png;*.jpg;*.jpeg;*.bmp;*.gif"),
+                ("PNG Files", "*.png"),
+                ("JPEG Files", "*.jpg;*.jpeg"),
+                ("BMP Files", "*.bmp"),
+                ("GIF Files", "*.gif"),
+            ],
+        )
+        self.contextImg = filepath
 
     def startMainLoop(self):
         self.root.mainloop()

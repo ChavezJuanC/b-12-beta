@@ -10,8 +10,6 @@ class VisionChatService:
         self.chatContext = []
 
     def askOllamaVision(self, promptMessage, imageContext):
-        if not self.verifyImageSorce(imageContext[0]):
-            return f"Could not locate image: {imageContext[0]}"
         try:
             if imageContext[0] == "":
                 response = ollama.chat(
@@ -61,11 +59,6 @@ class VisionChatService:
                 print(ollamaResponse)
             else:
                 break
-
-    def verifyImageSorce(self, imgSource):
-        if os.path.exists(imgSource) or imgSource == "":
-            return True
-        return False
 
     def add_history_log(self, res, promptMessage, imageContext=None):
         self.chatContext.append(
