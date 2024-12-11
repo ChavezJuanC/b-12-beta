@@ -6,6 +6,7 @@ import threading
 import requests
 from tkinter import filedialog
 
+
 class App:
     def __init__(
         self,
