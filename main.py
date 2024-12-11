@@ -5,6 +5,7 @@ from VisionOllamaChat import VisionChatService
 import threading
 import requests
 from tkinter import filedialog
+from PIL import Image, ImageOps, ImageFilter
 
 
 class App:
@@ -129,6 +130,14 @@ class App:
             font=("Consolas", 15),
         )
         userTextInput.place(x=0, y=5)
+        ##Attached Imgs
+        imgsFrame = ctk.CTkFrame(
+            master=UserInputSectionFrame,
+            height=35,
+            bg_color="white",
+            fg_color="white",
+        )
+        imgsFrame.place(x=10, y=140)
         userSendButtom = ctk.CTkButton(
             master=UserInputSectionFrame,
             text="Send Promt",
@@ -139,6 +148,7 @@ class App:
                     tkMaster=innerConversationFrame,
                     textProvider=userTextInput,
                     conversationFrame=conversationFrame,
+                    attachmentFrame=imgsFrame,
                 )
             ),
         )
@@ -149,6 +159,7 @@ class App:
                 tkMaster=innerConversationFrame,
                 textProvider=userTextInput,
                 conversationFrame=conversationFrame,
+                attachmentFrame=imgsFrame,
             ),
         )
 
@@ -166,7 +177,7 @@ class App:
             text="IM",
             width=40,
             height=40,
-            command=self.selectImageFile,
+            command=lambda: self.selectImageFile(attachmentFrame=imgsFrame),
         )
 
         ImgContextButton.place(x=0, y=45)
@@ -219,7 +230,6 @@ class App:
             ChatRes = self.OllamaChatLocal.askOllama(promptMessage=prompt)
 
         self.contextImg = ""
-
         newChatBubble = ChatBubble(
             tkMaster=tkMaster,
             color="transparent",
@@ -235,7 +245,9 @@ class App:
         messageFrame.update_idletasks()
         messageFrame._parent_canvas.yview_moveto(1.0)
 
-    def handleUserSend(self, tkMaster, textProvider, conversationFrame):
+    def handleUserSend(
+        self, tkMaster, textProvider, conversationFrame, attachmentFrame
+    ):
         self.spawnNewChatBubble(
             tkMaster=tkMaster,
             color="gray25",
@@ -252,7 +264,8 @@ class App:
             },
             daemon=True,
         ).start()
-        # reset textbox
+        # reset textbox & attachments
+        self.deleteAttachment(tkMaster=attachmentFrame)
         textProvider.delete("1.0", "end")
         return "break"  # Prevent the default action (moving to the next line)
 
@@ -263,7 +276,7 @@ class App:
         for widget in frame.winfo_children():
             widget.destroy()
 
-    def selectImageFile(self):
+    def selectImageFile(self, attachmentFrame):
         filepath = filedialog.askopenfilename(
             title="Select an image for context",
             filetypes=[
@@ -273,8 +286,36 @@ class App:
                 ("BMP Files", "*.bmp"),
                 ("GIF Files", "*.gif"),
             ],
-        )
+        ).replace("/", "\\\\")
         self.contextImg = filepath
+        self.createAttachment(tkMaster=attachmentFrame, imgSource=filepath)
+
+    def createAttachment(self, tkMaster, imgSource):
+        image = Image.open(imgSource)
+        imgTk = ctk.CTkImage(image)
+        imgLabel = ctk.CTkLabel(
+            master=tkMaster,
+            image=imgTk,
+            height=35,
+            text="",
+        )
+        imgLabel.place(x=0, y=0)
+        deleteButton = ctk.CTkButton(
+            master=tkMaster,
+            text="D",
+            width=15,
+            height=15,
+            command=lambda: self.deleteAttachmentAndClear(tkMaster=tkMaster),
+        )
+        deleteButton.place(x=24, y=7)
+
+    def deleteAttachmentAndClear(self, tkMaster):
+        self.deleteAttachment(tkMaster)
+        self.contextImg = ""
+
+    def deleteAttachment(self, tkMaster):
+        for widget in tkMaster.winfo_children():
+            widget.destroy()
 
     def startMainLoop(self):
         self.root.mainloop()
@@ -303,3 +344,12 @@ if __name__ == "__main__":
         print(
             f"Error Initializing App, Please try again and make sure to run pre-boot-script.py to launch\nError:{e}"
         )
+
+
+##future improvements
+##clear chat and attachements of models switch
+##if model in non-vision clear attachment
+
+##diable buttons while chat is thinking
+##enablethem when done
+##visual!

@@ -1,5 +1,4 @@
 import ollama
-import os
 
 class VisionChatService:
 
@@ -74,3 +73,5 @@ class VisionChatService:
 if __name__ == "__main__":
     visionChat = VisionChatService(visionModel="llama3.2-vision:11b ")
     visionChat.chatInteraction()
+
+
