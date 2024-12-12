@@ -39,7 +39,7 @@ class App:
         self.root.title("B-12 Beta")
         self.buildGUI()
 
-    def update_current_model(self, value, messageFrame, buttonList):
+    def update_current_model(self, value, messageFrame, buttonList, conversationFrame):
         self.current_model = value
 
         if self.current_model in VisionChatService.visionModels:
@@ -50,7 +50,7 @@ class App:
             for button in buttonList:
                 button.configure(state="disabled")
 
-        self.clear_conv_context(frame=messageFrame)
+        self.clear_conv_context(frame=messageFrame, conversationFrame=conversationFrame)
 
     def buildGUI(self):
         ##App Name
@@ -89,6 +89,7 @@ class App:
                     ImgContextButton,
                     attachmentContextButton,
                 ],
+                conversationFrame=conversationFrame,
             ),
         )
         modelDropdown.grid(row=0, column=1)
@@ -193,7 +194,9 @@ class App:
             text="CC",
             width=40,
             height=40,
-            command=lambda: self.clear_conv_context(frame=innerConversationFrame),
+            command=lambda: self.clear_conv_context(
+                frame=innerConversationFrame, conversationFrame=conversationFrame
+            ),
         )
         clearContextButton.place(x=0, y=135)
 
@@ -205,6 +208,7 @@ class App:
                 ImgContextButton,
                 attachmentContextButton,
             ],
+            conversationFrame=conversationFrame,
         )
 
     def spawnNewChatBubble(self, tkMaster, color, text, conversationFrame):
@@ -217,7 +221,7 @@ class App:
             sidePadding=5,
         )
         newChatBubble.createChatBubble()
-        self.scrollToRecentMessages(conversationFrame)
+        self.scrollToRecentMessages(conversationFrame, placement=1.0)
 
     def localAskOllama(self, tkMaster, prompt, conversationFrame):
         ##fetch here
@@ -239,15 +243,22 @@ class App:
             sidePadding=0,
         )
         newChatBubble.createChatBubble()
-        self.scrollToRecentMessages(messageFrame=conversationFrame)
+        self.scrollToRecentMessages(messageFrame=conversationFrame, placement=1.0)
 
-    def scrollToRecentMessages(self, messageFrame):
-        messageFrame.update_idletasks()
-        messageFrame._parent_canvas.yview_moveto(1.0)
+    def scrollToRecentMessages(self, messageFrame, placement):
+        try:
+            messageFrame.update_idletasks()
+            messageFrame._parent_canvas.yview_moveto(placement)
+        except Exception as e:
+            print("Error : ", e)
 
     def handleUserSend(
         self, tkMaster, textProvider, conversationFrame, attachmentFrame
     ):
+        ##check for image attachment
+        if self.contextImg != "":
+            self.includeImage(tkMaster=tkMaster, conversationFrame=conversationFrame)
+
         self.spawnNewChatBubble(
             tkMaster=tkMaster,
             color="gray25",
@@ -269,10 +280,12 @@ class App:
         textProvider.delete("1.0", "end")
         return "break"  # Prevent the default action (moving to the next line)
 
-    def clear_conv_context(self, frame):
+    def clear_conv_context(self, frame, conversationFrame):
         self.contextImg = ""
         self.OllamaChatLocal.clear_chat_context()
         self.OllamaVisionLocal.clear_chat_context()
+        self.scrollToRecentMessages(messageFrame=conversationFrame, placement=0)
+
         for widget in frame.winfo_children():
             widget.destroy()
 
@@ -289,6 +302,23 @@ class App:
         ).replace("/", "\\\\")
         self.contextImg = filepath
         self.createAttachment(tkMaster=attachmentFrame, imgSource=filepath)
+
+    def includeImage(self, tkMaster, conversationFrame):
+        image = Image.open(self.contextImg)
+        imgTk = ctk.CTkImage(image, size=(200, 200))
+        imgLabel = ctk.CTkLabel(
+            text="",
+            master=tkMaster,
+            image=imgTk,
+            padx=0,
+            pady=10,
+            width=200,
+            height=200,
+            corner_radius=15,
+            justify="left",
+        )
+        imgLabel.pack(side="top", anchor="e", padx=10, pady=10)
+        self.scrollToRecentMessages(messageFrame=conversationFrame, placement=1.0)
 
     def createAttachment(self, tkMaster, imgSource):
         image = Image.open(imgSource)
