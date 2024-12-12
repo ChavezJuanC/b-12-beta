@@ -5,8 +5,7 @@ from VisionOllamaChat import VisionChatService
 import threading
 import requests
 from tkinter import filedialog
-from PIL import Image, ImageOps, ImageFilter
-
+from PIL import Image
 
 class App:
     def __init__(
@@ -39,7 +38,9 @@ class App:
         self.root.title("B-12 Beta")
         self.buildGUI()
 
-    def update_current_model(self, value, messageFrame, buttonList, conversationFrame):
+    def update_current_model(
+        self, value, messageFrame, buttonList, conversationFrame, attachmentFrame
+    ):
         self.current_model = value
 
         if self.current_model in VisionChatService.visionModels:
@@ -49,8 +50,10 @@ class App:
         else:
             for button in buttonList:
                 button.configure(state="disabled")
+                #######################################################################
 
         self.clear_conv_context(frame=messageFrame, conversationFrame=conversationFrame)
+        self.deleteAttachmentAndClear(tkMaster=attachmentFrame)
 
     def buildGUI(self):
         ##App Name
@@ -90,6 +93,7 @@ class App:
                     attachmentContextButton,
                 ],
                 conversationFrame=conversationFrame,
+                attachmentFrame=imgsFrame,
             ),
         )
         modelDropdown.grid(row=0, column=1)
@@ -209,6 +213,7 @@ class App:
                 attachmentContextButton,
             ],
             conversationFrame=conversationFrame,
+            attachmentFrame=imgsFrame,
         )
 
     def spawnNewChatBubble(self, tkMaster, color, text, conversationFrame):
