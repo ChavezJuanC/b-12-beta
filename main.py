@@ -6,6 +6,8 @@ import threading
 import requests
 from tkinter import filedialog
 from PIL import Image
+import time
+
 
 class App:
     def __init__(
@@ -153,6 +155,14 @@ class App:
                     textProvider=userTextInput,
                     conversationFrame=conversationFrame,
                     attachmentFrame=imgsFrame,
+                    sendButton=userSendButtom,
+                    buttonsList=[
+                        clearContextButton,
+                        screenContextButton,
+                        attachmentContextButton,
+                        ImgContextButton,
+                        modelDropdown,
+                    ],
                 )
             ),
         )
@@ -164,6 +174,14 @@ class App:
                 textProvider=userTextInput,
                 conversationFrame=conversationFrame,
                 attachmentFrame=imgsFrame,
+                sendButton=userSendButtom,
+                buttonsList=[
+                    clearContextButton,
+                    screenContextButton,
+                    attachmentContextButton,
+                    ImgContextButton,
+                    modelDropdown,
+                ],
             ),
         )
 
@@ -257,7 +275,13 @@ class App:
             print("Error : ", e)
 
     def handleUserSend(
-        self, tkMaster, textProvider, conversationFrame, attachmentFrame
+        self,
+        tkMaster,
+        textProvider,
+        conversationFrame,
+        attachmentFrame,
+        sendButton,
+        buttonsList,
     ):
         ##check for image attachment
         if self.contextImg != "":
@@ -270,7 +294,7 @@ class App:
             conversationFrame=conversationFrame,
         )
         # Independent Thread to avoid main thread interuption
-        threading.Thread(
+        ollamaThread = threading.Thread(
             target=self.localAskOllama,
             kwargs={
                 "tkMaster": tkMaster,
@@ -278,11 +302,43 @@ class App:
                 "conversationFrame": conversationFrame,
             },
             daemon=True,
-        ).start()
+        )
+        ollamaThread.start()
         # reset textbox & attachments
         self.deleteAttachment(tkMaster=attachmentFrame)
         textProvider.delete("1.0", "end")
+
+        self.setThinkingState(
+            sendButton=sendButton, ollamaThread=ollamaThread, buttonsList=buttonsList
+        )
+        ##Thinking...
+
         return "break"  # Prevent the default action (moving to the next line)
+
+    def setThinkingState(self, sendButton, ollamaThread, buttonsList):
+
+        def thinkingAnimation():
+            for button in buttonsList:
+                button.configure(state="disabled")
+
+            while ollamaThread.is_alive():
+                sendButton.configure(text="Thinking.")
+                self.root.update()
+                time.sleep(0.5)
+                sendButton.configure(text="Thinking..")
+                self.root.update()
+                time.sleep(0.5)
+                sendButton.configure(text="Thinking...")
+                self.root.update()
+                time.sleep(0.5)
+
+            for button in buttonsList:
+                button.configure(state="normal")
+
+            sendButton.configure(text="Send")
+            self.root.update()
+
+        threading.Thread(target=thinkingAnimation, daemon=True).start()
 
     def clear_conv_context(self, frame, conversationFrame):
         self.contextImg = ""
@@ -379,3 +435,8 @@ if __name__ == "__main__":
             f"Error Initializing App, Please try again and make sure to run pre-boot-script.py to launch\nError:{e}"
         )
 
+
+##TO DO##
+##implement screen capture as an attachment... (how to screen shot?? and than keep file path?? whaauttttt)
+##if screen capture is selected.. clear contextImage and add attachement with screen shot path
+##handle like regular image...
