@@ -50,7 +50,6 @@ class App:
         else:
             for button in buttonList:
                 button.configure(state="disabled")
-                #######################################################################
 
         self.clear_conv_context(frame=messageFrame, conversationFrame=conversationFrame)
         self.deleteAttachmentAndClear(tkMaster=attachmentFrame)
@@ -380,11 +379,3 @@ if __name__ == "__main__":
             f"Error Initializing App, Please try again and make sure to run pre-boot-script.py to launch\nError:{e}"
         )
 
-
-##future improvements
-##clear chat and attachements of models switch
-##if model in non-vision clear attachment
-
-##diable buttons while chat is thinking
-##enablethem when done
-##visual!
