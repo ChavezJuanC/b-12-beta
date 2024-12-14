@@ -10,7 +10,7 @@ class ScreenShoooter:
 
     def allocatePngDestination(self, name):
         try:
-            file = "b12photos/".format(name)
+            file = "b12ScreenShots/".format(name)
             directory = os.path.dirname(file)
 
             if not os.path.exists(directory):
@@ -27,8 +27,8 @@ class ScreenShoooter:
                 self.allocatePngDestination("screenshot")
                 screen_shot_imgae = pyautogui.screenshot(region=(0, 0, 1470, 1030))
                 screen_shot_imgae.save(
-                    "Screen_Shot_{}.png".format(
-                        (datetime.date.today()).strftime("%m-%d-%Y-%X")
+                    "b12photos\\Screen_Shot_{}.png".format(
+                        (datetime.datetime.now()).strftime("%m-%d-%Y-%I-%M-%S")
                     )
                 )
                 return True

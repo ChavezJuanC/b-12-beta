@@ -7,6 +7,7 @@ import requests
 from tkinter import filedialog
 from PIL import Image
 import time
+from ScreenShot import ScreenShoooter
 
 
 class App:
