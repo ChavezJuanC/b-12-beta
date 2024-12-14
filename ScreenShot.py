@@ -3,13 +3,12 @@ import keyboard
 import os
 import datetime
 
-
 class ScreenShoooter:
 
     def __init__(self):
         pass
 
-    def allocatePngFile(self, name):
+    def allocatePngDestination(self, name):
         try:
             file = "b12photos/".format(name)
             directory = os.path.dirname(file)
@@ -25,17 +24,16 @@ class ScreenShoooter:
         try:
             if keyboard.read_key() == "\\":
                 print("SMILEEEE")
-                self.allocatePngFile("screenshot")
+                self.allocatePngDestination("screenshot")
                 screen_shot_imgae = pyautogui.screenshot(region=(0, 0, 1470, 1030))
                 screen_shot_imgae.save(
                     "Screen_Shot_{}.png".format(
-                        (datetime.date.today()).strftime("%m-%d-%Y")
+                        (datetime.date.today()).strftime("%m-%d-%Y-%X")
                     )
                 )
                 return True
         except Exception as e:
             print("Error while taking screenshot", e)
-
 
 if __name__ == "__main__":
     shooter = ScreenShoooter()
