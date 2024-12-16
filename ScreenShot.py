@@ -1,5 +1,4 @@
 import pyautogui
-import keyboard
 import os
 import datetime
 
@@ -20,22 +19,16 @@ class ScreenShoooter:
             print("Error ollacating space for file.\n{}".format(e))
 
     ##This function is intended to run inside a loop of some sort ex : While True: listenForScreenShot()
-    def listenForScreenShot(self):
+    def takeScreenShot(self):
         try:
-            if keyboard.read_key() == "\\":
-                print("SMILEEEE")
-                self.allocatePngDestination("screenshot")
-                screen_shot_imgae = pyautogui.screenshot(region=(0, 0, 1470, 1030))
-                screen_shot_imgae.save(
-                    "b12photos\\Screen_Shot_{}.png".format(
-                        (datetime.datetime.now()).strftime("%m-%d-%Y-%I-%M-%S")
-                    )
-                )
-                return True
+            print("SMILEEEE")
+            self.allocatePngDestination("screenshot")
+            screen_shot_imgae = pyautogui.screenshot(region=(0, 0, 1470, 1030))
+            file_name = "b12photos\\Screen_Shot_{}.png".format(
+                (datetime.datetime.now()).strftime("%m-%d-%Y-%I-%M-%S")
+            )
+            screen_shot_imgae.save(file_name)
+            return file_name
         except Exception as e:
             print("Error while taking screenshot", e)
-
-if __name__ == "__main__":
-    shooter = ScreenShoooter()
-    while True:
-        shooter.listenForScreenShot()
+            return e

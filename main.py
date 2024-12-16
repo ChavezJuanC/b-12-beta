@@ -20,6 +20,7 @@ class App:
         models_list,
         current_model,
     ):
+        self.screenShooter = ScreenShoooter()
         self.current_model = current_model
         self.app_width = app_width
         self.app_height = app_height
@@ -192,7 +193,11 @@ class App:
         )
         userAttachmentButtonsFrame.place(x=373, y=15)
         screenContextButton = ctk.CTkButton(
-            master=userAttachmentButtonsFrame, text="SC", width=40, height=40
+            master=userAttachmentButtonsFrame,
+            text="SC",
+            width=40,
+            height=40,
+            command=lambda: self.snapScreenShot(attachmentFrame=imgsFrame),
         )
         screenContextButton.place(x=0, y=0)
         ImgContextButton = ctk.CTkButton(
@@ -407,6 +412,11 @@ class App:
     def deleteAttachment(self, tkMaster):
         for widget in tkMaster.winfo_children():
             widget.destroy()
+
+    def snapScreenShot(self, attachmentFrame):
+        photoFile = self.screenShooter.takeScreenShot()
+        self.contextImg = photoFile
+        self.createAttachment(tkMaster=attachmentFrame, imgSource=photoFile)
 
     def startMainLoop(self):
         self.root.mainloop()
